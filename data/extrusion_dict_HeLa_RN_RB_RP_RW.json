@@ -20,6 +20,9 @@
     "LEF_stalled_off_rate": {
         "A": 0.009176225234619396
     },
+	"LEF_diffusion_rate": {
+		"A": 0
+	},
     "LEF_pause": {
         "A": 0
     },
@@ -50,6 +53,7 @@
         }
     },
     "LEF_separation": 30,
+    "mode": "symmetric",
     "sites_per_monomer": 1,
     "monomers_per_replica": 200000,
     "number_of_replica": 1,
