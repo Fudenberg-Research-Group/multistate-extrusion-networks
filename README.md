@@ -17,9 +17,7 @@ To simulate genome conformations, we couple a 1D lattice model describing cohesi
 This movie illustrates a typical trajectory of a single extruder for this model, sped up by a factor of 10 relative to real time.
 The extruder is loaded into an active NIPBL-bound (blue) state, goes through multiple rounds of PDS5 exchange (green states), and finally unloads after WAPL binding (purple). Note that we stretch the chromatin on either side of this extruder for visualization purposes.
 
-[!Watch the video](https://github.com/user-attachments/assets/0e392265-457f-49ed-a4af-4a700d4a4917)
-
-
+[!Watch the video](https://github.com/user-attachments/assets/2d13ef30-2c15-4322-bf2d-8f2c3dd2a510)
 
 
 
