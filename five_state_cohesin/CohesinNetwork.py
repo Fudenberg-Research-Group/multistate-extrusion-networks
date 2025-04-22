@@ -72,21 +72,21 @@ class CohesinNetwork(nx.MultiDiGraph):
 
             subs_dict['RB'] -= subs_dict[f"R{p}"]
 
+        # Equilibrium RAD21 bound fractions & residence times
         subs_R = {k: v for k, v in subs_dict.items() if k not in ['R']}
         eq_R = self.rhs[self.state_ids['R']].subs(subs_R)
 
-        # Equilibrium RAD21 bound fractions & residence times
         rhs_bound_R = 1 / self.residence_times['R'] * self.bound_fractions['R'] / (1-self.bound_fractions['R'])
         rhs_residence_R = -1 / self.residence_times['R'] * self.bound_fractions['R']*self.abundances['R']
 
         rhs_eq[self.state_ids['R']] = sym.collect(eq_R, self.states['R']).coeff(self.states['R'], 1) + rhs_bound_R
         rhs_eq[self.state_ids['RB']] = sym.collect(eq_R, self.states['R']).coeff(self.states['R'], 0) + rhs_residence_R
 
+		# Equilibrium accessory protein bound fractions & residence times
         for p in self.accessory_proteins:
             subs = {k: v for k, v in subs_dict.items() if k not in [p, f"R{p}"]}
             eq = self.rhs[self.state_ids[p]].subs(subs)
 
-            # Equilibrium accessory protein bound fractions & residence times
             rhs_bound = 1 / self.residence_times[p] * self.bound_fractions[p] / (1-self.bound_fractions[p])
             rhs_residence = -1 / self.residence_times[p]
 
@@ -131,17 +131,14 @@ class CohesinNetwork(nx.MultiDiGraph):
             print("Network lacks fitted rate values - please run 'solve_rates' method first")
 
 
-    def to_extrusion_dict(self, parameter_dict,
-	                      reference_dict={"LEF_transition_rates": {}},
-	                      t=10000,
-	                      site_types=['A'],
-	                      fix_velocity=False,
-	                      active_states=['RN']):
+    def to_extrusion_dict(self, parameter_dict, t=10000, n_steps=25000, site_types=['A']):
 		
-        output_dict = reference_dict.copy()
+        output_dict = {}
+        
+        output_dict["LEF_transition_rates"] = {}
         output_dict["LEF_states"] = {k: v+1 for v, k in enumerate(self.sequence)}
 
-        kinetics = self.solve_kinetics(parameter_dict, t_max=t)
+        kinetics = self.solve_kinetics(parameter_dict, t_max=t, n_steps=n_steps)
         final_state = kinetics.y[:,-1]
 
         for rate, value in self.rate_dict.items():
@@ -164,17 +161,5 @@ class CohesinNetwork(nx.MultiDiGraph):
             elif id2 == 0:
                 output_dict["LEF_off_rate"] = {t: float(value) for t in site_types}
                 output_dict["LEF_stalled_off_rate"] = {t: float(value) for t in site_types}
-
-        if fix_velocity:
-            if "velocity_multiplier" in reference_dict.keys():
-                active_indices = [self.full_states.index(state) for state in active_states]
-                active_levels = [final_state[index] for index in active_indices]
-
-                rescale_velocity = parameter_dict['F_R'] * parameter_dict['N_R'] / sum(active_levels)
-
-                output_dict["velocity_multiplier"] *= rescale_velocity
-
-            else:
-                print("fix_velocity option requires velocity_multiplier to be defined in the reference extrusion dictionary")
 
         return output_dict
